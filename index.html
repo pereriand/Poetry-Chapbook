@@ -152,6 +152,204 @@
     <div class="nav-hint">Scroll to move between poems</div>
 
     <script>
+        // Add this function to check if dependencies are loaded
+        function checkDependencies() {
+            return window.React && window.ReactDOM && window.lucide;
+        }
+
+        // Wrap the burning poem initialization in a function
+        function initializeBurningPoem() {
+            if (!checkDependencies()) {
+                console.log("Waiting for dependencies...");
+                setTimeout(initializeBurningPoem, 100);
+                return;
+            }
+
+            // Burning poem component
+            const BurningPoem = () => {
+                const [isLit, setIsLit] = React.useState(false);
+                const [burningCells, setBurningCells] = React.useState(new Set());
+                const [burntCells, setBurntCells] = React.useState(new Set());
+                const [isJumpingLine, setIsJumpingLine] = React.useState(false);
+                const [complete, setComplete] = React.useState(false);
+                
+                const topPoem = [
+                    "Words ignite like wandering flames,",
+                    "dancing back across empty space,",
+                    "each letter yields to amber light,",
+                    "returning right then left again,",
+                    "until all thoughts are ash and air,",
+                    "and only memory remains."
+                ];
+
+                const hiddenPoem = [
+                    "Beneath the ash, new words emerge,",
+                    "phoenix-like from burning page,",
+                    "secrets written long ago,",
+                    "awakening from their cage,",
+                    "what once was lost returns anew,",
+                    "rebirth upon this stage."
+                ];
+
+                const getCellKey = (lineIndex, charIndex) => `${lineIndex}-${charIndex}`;
+
+                React.useEffect(() => {
+                    let interval;
+                    if (isLit && !complete) {
+                        interval = setInterval(() => {
+                            setBurningCells(prev => {
+                                const next = new Set(prev);
+                                const currentBurnt = new Set(burntCells);
+                                
+                                if (prev.size === 0) {
+                                    next.add(getCellKey(0, 0));
+                                    return next;
+                                }
+
+                                if (isJumpingLine) {
+                                    setIsJumpingLine(false);
+                                    return prev;
+                                }
+
+                                let allProcessed = true;
+                                [...prev].forEach(key => {
+                                    const [lineIndex, charIndex] = key.split('-').map(Number);
+                                    
+                                    if (![...next].some(k => {
+                                        const [l, c] = k.split('-').map(Number);
+                                        return l === lineIndex && c === charIndex - 1;
+                                    })) {
+                                        currentBurnt.add(key);
+                                        next.delete(key);
+                                    }
+                                    
+                                    if (charIndex + 1 < topPoem[lineIndex].length) {
+                                        const nextKey = getCellKey(lineIndex, charIndex + 1);
+                                        if (!currentBurnt.has(nextKey) && !next.has(nextKey)) {
+                                            next.add(nextKey);
+                                            allProcessed = false;
+                                        }
+                                    }
+
+                                    if (lineIndex + 1 < topPoem.length) {
+                                        const downKey = getCellKey(lineIndex + 1, charIndex);
+                                        if (!currentBurnt.has(downKey) && !next.has(downKey)) {
+                                            next.add(downKey);
+                                            allProcessed = false;
+                                            setIsJumpingLine(true);
+                                        }
+                                    }
+                                });
+
+                                if (allProcessed && next.size === 0) {
+                                    setComplete(true);
+                                }
+
+                                setBurntCells(currentBurnt);
+                                return next;
+                            });
+                        }, 50);
+                    }
+                    return () => clearInterval(interval);
+                }, [isLit, isJumpingLine, burntCells, complete]);
+
+                const renderLine = (topLine, hiddenLine, lineIndex) => {
+                    return React.createElement("div", { key: lineIndex, className: "font-serif text-lg relative" },
+                        React.createElement("div", { className: "relative" },
+                            React.createElement("div", { className: "relative z-10" },
+                                topLine.split('').map((char, charIndex) => {
+                                    const cellKey = getCellKey(lineIndex, charIndex);
+                                    const isBurning = burningCells.has(cellKey);
+                                    const isBurnt = burntCells.has(cellKey);
+
+                                    const getCharStyle = () => {
+                                        if (isBurning) {
+                                            return {
+                                                color: '#f97316',
+                                                textShadow: '0 0 4px #f97316, 0 0 8px #f97316, 0 0 12px #f97316',
+                                                filter: 'blur(0.5px)',
+                                                transition: 'all 300ms'
+                                            };
+                                        } else if (isBurnt) {
+                                            return {
+                                                opacity: 0,
+                                                transition: 'all 300ms'
+                                            };
+                                        }
+                                        return {
+                                            color: '#1f2937',
+                                            transition: 'all 300ms'
+                                        };
+                                    };
+
+                                    return React.createElement("span", {
+                                        key: cellKey,
+                                        style: getCharStyle()
+                                    }, char);
+                                })
+                            ),
+                            React.createElement("div", { className: "absolute top-0 left-0 w-full" },
+                                hiddenLine.split('').map((char, charIndex) => {
+                                    const cellKey = getCellKey(lineIndex, charIndex);
+                                    const isBurnt = burntCells.has(cellKey);
+
+                                    return React.createElement("span", {
+                                        key: `hidden-${cellKey}`,
+                                        style: {
+                                            color: '#ef4444',
+                                            textShadow: '0 0 2px #b91c1c, 0 0 4px #991b1b',
+                                            opacity: isBurnt ? 1 : 0,
+                                            transition: 'opacity 300ms ease-in',
+                                            fontWeight: '500'
+                                        }
+                                    }, char);
+                                })
+                            )
+                        )
+                    );
+                };
+
+                return React.createElement("div", { className: "max-w-xl mx-auto p-8 bg-white rounded-lg shadow-lg" },
+                    React.createElement("div", { className: "flex gap-6" },
+                        React.createElement("button", {
+                            onClick: () => setIsLit(true),
+                            disabled: isLit,
+                            className: "h-32 w-12 rounded-sm flex flex-col items-center justify-between p-2",
+                            style: {
+                                background: 'linear-gradient(to bottom, #e5e7eb, #d1d5db)',
+                                border: '1px solid #9ca3af',
+                                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                            }
+                        },
+                            React.createElement("div", { className: "w-8 h-3 bg-zinc-600 rounded-sm" }),
+                            React.createElement(lucide.Flame, { 
+                                className: `w-6 h-6 text-orange-500 ${isLit ? 'animate-pulse' : ''}`,
+                                color: "#f97316",
+                                size: 24
+                            }),
+                            React.createElement("div", {
+                                className: "w-10 h-12 bg-zinc-300 rounded-sm",
+                                style: {
+                                    background: 'linear-gradient(to bottom, #71717a, #52525b)',
+                                    border: '1px solid #3f3f46'
+                                }
+                            })
+                        ),
+                        React.createElement("div", { className: "space-y-4 flex-1" },
+                            topPoem.map((line, index) => renderLine(line, hiddenPoem[index], index))
+                        )
+                    )
+                );
+            };
+
+            // Make sure the target element exists before creating root
+            const burningPoemElement = document.getElementById('burning-poem');
+            if (burningPoemElement) {
+                const root = ReactDOM.createRoot(burningPoemElement);
+                root.render(React.createElement(BurningPoem));
+            }
+        }
+
         // Tense poem logic
         const poem = [
             // First stanza
@@ -273,189 +471,14 @@
             }
         });
 
-        // Initialize tense poem
-        updateDisplay();
-
-        // Burning poem component
-        const BurningPoem = () => {
-            const [isLit, setIsLit] = React.useState(false);
-            const [burningCells, setBurningCells] = React.useState(new Set());
-            const [burntCells, setBurntCells] = React.useState(new Set());
-            const [isJumpingLine, setIsJumpingLine] = React.useState(false);
-            const [complete, setComplete] = React.useState(false);
+        // Initialize both poems when the document is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the tense poem
+            updateDisplay();
             
-            const topPoem = [
-                "Words ignite like wandering flames,",
-                "dancing back across empty space,",
-                "each letter yields to amber light,",
-                "returning right then left again,",
-                "until all thoughts are ash and air,",
-                "and only memory remains."
-            ];
-
-            const hiddenPoem = [
-                "Beneath the ash, new words emerge,",
-                "phoenix-like from burning page,",
-                "secrets written long ago,",
-                "awakening from their cage,",
-                "what once was lost returns anew,",
-                "rebirth upon this stage."
-            ];
-
-            const getCellKey = (lineIndex, charIndex) => `${lineIndex}-${charIndex}`;
-
-            React.useEffect(() => {
-                let interval;
-                if (isLit && !complete) {
-                    interval = setInterval(() => {
-                        setBurningCells(prev => {
-                            const next = new Set(prev);
-                            const currentBurnt = new Set(burntCells);
-                            
-                            if (prev.size === 0) {
-                                next.add(getCellKey(0, 0));
-                                return next;
-                            }
-
-                            if (isJumpingLine) {
-                                setIsJumpingLine(false);
-                                return prev;
-                            }
-
-                            let allProcessed = true;
-                            [...prev].forEach(key => {
-                                const [lineIndex, charIndex] = key.split('-').map(Number);
-                                
-                                if (![...next].some(k => {
-                                    const [l, c] = k.split('-').map(Number);
-                                    return l === lineIndex && c === charIndex - 1;
-                                })) {
-                                    currentBurnt.add(key);
-                                    next.delete(key);
-                                }
-                                
-                                if (charIndex + 1 < topPoem[lineIndex].length) {
-                                    const nextKey = getCellKey(lineIndex, charIndex + 1);
-                                    if (!currentBurnt.has(nextKey) && !next.has(nextKey)) {
-                                        next.add(nextKey);
-                                        allProcessed = false;
-                                    }
-                                }
-
-                                if (lineIndex + 1 < topPoem.length) {
-                                    const downKey = getCellKey(lineIndex + 1, charIndex);
-                                    if (!currentBurnt.has(downKey) && !next.has(downKey)) {
-                                        next.add(downKey);
-                                        allProcessed = false;
-                                        setIsJumpingLine(true);
-                                    }
-                                }
-                            });
-
-                            if (allProcessed && next.size === 0) {
-                                setComplete(true);
-                            }
-
-                            setBurntCells(currentBurnt);
-                            return next;
-                        });
-                    }, 50);
-                }
-                return () => clearInterval(interval);
-            }, [isLit, isJumpingLine, burntCells, complete]);
-
-            const renderLine = (topLine, hiddenLine, lineIndex) => {
-                return React.createElement("div", { key: lineIndex, className: "font-serif text-lg relative" },
-                    React.createElement("div", { className: "relative" },
-                        React.createElement("div", { className: "relative z-10" },
-                            topLine.split('').map((char, charIndex) => {
-                                const cellKey = getCellKey(lineIndex, charIndex);
-                                const isBurning = burningCells.has(cellKey);
-                                const isBurnt = burntCells.has(cellKey);
-
-                                const getCharStyle = () => {
-                                    if (isBurning) {
-                                        return {
-                                            color: '#f97316',
-                                            textShadow: '0 0 4px #f97316, 0 0 8px #f97316, 0 0 12px #f97316',
-                                            filter: 'blur(0.5px)',
-                                            transition: 'all 300ms'
-                                        };
-                                    } else if (isBurnt) {
-                                        return {
-                                            opacity: 0,
-                                            transition: 'all 300ms'
-                                        };
-                                    }
-                                    return {
-                                        color: '#1f2937',
-                                        transition: 'all 300ms'
-                                    };
-                                };
-
-                                return React.createElement("span", {
-                                    key: cellKey,
-                                    style: getCharStyle()
-                                }, char);
-                            })
-                        ),
-                        React.createElement("div", { className: "absolute top-0 left-0 w-full" },
-                            hiddenLine.split('').map((char, charIndex) => {
-                                const cellKey = getCellKey(lineIndex, charIndex);
-                                const isBurnt = burntCells.has(cellKey);
-
-                                return React.createElement("span", {
-                                    key: `hidden-${cellKey}`,
-                                    style: {
-                                        color: '#ef4444',
-                                        textShadow: '0 0 2px #b91c1c, 0 0 4px #991b1b',
-                                        opacity: isBurnt ? 1 : 0,
-                                        transition: 'opacity 300ms ease-in',
-                                        fontWeight: '500'
-                                    }
-                                }, char);
-                            })
-                        )
-                    )
-                );
-            };
-
-            return React.createElement("div", { className: "max-w-xl mx-auto p-8 bg-white rounded-lg shadow-lg" },
-                React.createElement("div", { className: "flex gap-6" },
-                    React.createElement("button", {
-                        onClick: () => setIsLit(true),
-                        disabled: isLit,
-                        className: "h-32 w-12 rounded-sm flex flex-col items-center justify-between p-2",
-                        style: {
-                            background: 'linear-gradient(to bottom, #e5e7eb, #d1d5db)',
-                            border: '1px solid #9ca3af',
-                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-                        }
-                    },
-                        React.createElement("div", { className: "w-8 h-3 bg-zinc-600 rounded-sm" }),
-                        React.createElement(lucide.Flame, { 
-                            className: `w-6 h-6 text-orange-500 ${isLit ? 'animate-pulse' : ''}`,
-                            color: "#f97316",
-                            size: 24
-                        }),
-                        React.createElement("div", {
-                            className: "w-10 h-12 bg-zinc-300 rounded-sm",
-                            style: {
-                                background: 'linear-gradient(to bottom, #71717a, #52525b)',
-                                border: '1px solid #3f3f46'
-                            }
-                        })
-                    ),
-                    React.createElement("div", { className: "space-y-4 flex-1" },
-                        topPoem.map((line, index) => renderLine(line, hiddenPoem[index], index))
-                    )
-                )
-            );
-        };
-
-        // Initialize burning poem
-        const root = ReactDOM.createRoot(document.getElementById('burning-poem'));
-        root.render(React.createElement(BurningPoem));
+            // Initialize the burning poem with dependency checking
+            initializeBurningPoem();
+        });
     </script>
 </body>
 </html>
