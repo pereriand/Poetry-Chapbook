@@ -2,9 +2,21 @@
 <html>
 <head>
     <title>Interactive Poetry Chapbook</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
+    <!-- Updated script tags with specific versions and crossorigin -->
+    <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/lucide@0.263.1/dist/umd/lucide.min.js"></script>
+
+    <!-- Add debug logging -->
+    <script>
+        window.addEventListener('load', function() {
+            console.log('Window loaded');
+            console.log('React available:', !!window.React);
+            console.log('ReactDOM available:', !!window.ReactDOM);
+            console.log('Lucide available:', !!window.lucide);
+        });
+    </script>
+
     <style>
         /* Global styles */
         body {
@@ -152,9 +164,17 @@
     <div class="nav-hint">Scroll to move between poems</div>
 
     <script>
-        // Add this function to check if dependencies are loaded
+        // Modified dependency checker with logging
         function checkDependencies() {
-            return window.React && window.ReactDOM && window.lucide;
+            const hasReact = !!window.React;
+            const hasReactDOM = !!window.ReactDOM;
+            const hasLucide = !!window.lucide;
+            console.log('Checking dependencies:', 
+                'React:', hasReact, 
+                'ReactDOM:', hasReactDOM, 
+                'Lucide:', hasLucide
+            );
+            return hasReact && hasReactDOM && hasLucide;
         }
 
         // Wrap the burning poem initialization in a function
@@ -165,7 +185,6 @@
                 return;
             }
 
-            // Burning poem component
             const BurningPoem = () => {
                 const [isLit, setIsLit] = React.useState(false);
                 const [burningCells, setBurningCells] = React.useState(new Set());
@@ -342,7 +361,6 @@
                 );
             };
 
-            // Make sure the target element exists before creating root
             const burningPoemElement = document.getElementById('burning-poem');
             if (burningPoemElement) {
                 const root = ReactDOM.createRoot(burningPoemElement);
