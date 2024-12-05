@@ -2,18 +2,25 @@
 <html>
 <head>
     <title>Interactive Poetry Chapbook</title>
-    <!-- Updated script tags with specific versions and crossorigin -->
-    <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/lucide@0.263.1/dist/umd/lucide.min.js"></script>
+    <meta charset="UTF-8">
 
-    <!-- Add debug logging -->
+    <!-- Load React and ReactDOM from jsDelivr -->
+    <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js" integrity="sha256-S0lp+k7zWUMk2ixteM6HZvu8L9Eh//OVrt+ZfbCpmgY=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js" integrity="sha256-IXWO0ITNDjfnNXIu5POVfqlgYoop36bDzhodR6LW5Pc=" crossorigin="anonymous"></script>
+
+    <!-- Load Lucide from jsDelivr -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.1/dist/umd/lucide.min.js" integrity="sha256-6yNlEGalYS+G8oE/poKdJwf/oWByqBOc2t+5VNe7OvM=" crossorigin="anonymous"></script>
+
+    <!-- Debug script -->
     <script>
-        window.addEventListener('load', function() {
-            console.log('Window loaded');
-            console.log('React available:', !!window.React);
-            console.log('ReactDOM available:', !!window.ReactDOM);
-            console.log('Lucide available:', !!window.lucide);
+        console.log('Starting script load...');
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM Content Loaded');
+            console.log({
+                react: typeof React,
+                reactDOM: typeof ReactDOM,
+                lucide: typeof lucide
+            });
         });
     </script>
 
@@ -164,7 +171,6 @@
     <div class="nav-hint">Scroll to move between poems</div>
 
     <script>
-        // Modified dependency checker with logging
         function checkDependencies() {
             const hasReact = !!window.React;
             const hasReactDOM = !!window.ReactDOM;
@@ -177,7 +183,6 @@
             return hasReact && hasReactDOM && hasLucide;
         }
 
-        // Wrap the burning poem initialization in a function
         function initializeBurningPoem() {
             if (!checkDependencies()) {
                 console.log("Waiting for dependencies...");
@@ -489,7 +494,6 @@
             }
         });
 
-        // Initialize both poems when the document is ready
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize the tense poem
             updateDisplay();
