@@ -2,9 +2,32 @@
 <html>
 <head>
     <title>Interactive Poetry Chapbook</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
+    <meta charset="UTF-8">
+
+    <!-- Load React and ReactDOM from jsDelivr with SRI hashes, with defer -->
+    <script defer src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js" integrity="sha256-S0lp+k7zWUMk2ixteM6HZvu8L9Eh//OVrt+ZfbCpmgY=" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js" integrity="sha256-IXWO0ITNDjfnNXIu5POVfqlgYoop36bDzhodR6LW5Pc=" crossorigin="anonymous"></script>
+
+    <!-- Load Lucide from jsDelivr with defer -->
+    <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.263.1/dist/umd/lucide.min.js" integrity="sha256-6yNlEGalYS+G8oE/poKdJwf/oWByqBOc2t+5VNe7OvM=" crossorigin="anonymous"></script>
+
+    <!-- Initialization moved to window.load event -->
+    <script defer>
+        console.log('Starting script load...');
+        window.addEventListener('load', () => {
+            console.log('Window loaded');
+            console.log({
+                react: typeof React,
+                reactDOM: typeof ReactDOM,
+                lucide: typeof lucide
+            });
+
+            // Initialize both poems after window load
+            updateDisplay();
+            initializeBurningPoem();
+        });
+    </script>
+
     <style>
         /* Global styles */
         body {
@@ -151,13 +174,19 @@
 
     <div class="nav-hint">Scroll to move between poems</div>
 
-    <script>
-        // Add this function to check if dependencies are loaded
+    <script defer>
         function checkDependencies() {
-            return window.React && window.ReactDOM && window.lucide;
+            const hasReact = !!window.React;
+            const hasReactDOM = !!window.ReactDOM;
+            const hasLucide = !!window.lucide;
+            console.log('Checking dependencies:', 
+                'React:', hasReact, 
+                'ReactDOM:', hasReactDOM, 
+                'Lucide:', hasLucide
+            );
+            return hasReact && hasReactDOM && hasLucide;
         }
 
-        // Wrap the burning poem initialization in a function
         function initializeBurningPoem() {
             if (!checkDependencies()) {
                 console.log("Waiting for dependencies...");
@@ -165,7 +194,6 @@
                 return;
             }
 
-            // Burning poem component
             const BurningPoem = () => {
                 const [isLit, setIsLit] = React.useState(false);
                 const [burningCells, setBurningCells] = React.useState(new Set());
@@ -215,6 +243,7 @@
                                 [...prev].forEach(key => {
                                     const [lineIndex, charIndex] = key.split('-').map(Number);
                                     
+                                    // Once a cell has been processed, it burns out
                                     if (![...next].some(k => {
                                         const [l, c] = k.split('-').map(Number);
                                         return l === lineIndex && c === charIndex - 1;
@@ -223,6 +252,7 @@
                                         next.delete(key);
                                     }
                                     
+                                    // Move right
                                     if (charIndex + 1 < topPoem[lineIndex].length) {
                                         const nextKey = getCellKey(lineIndex, charIndex + 1);
                                         if (!currentBurnt.has(nextKey) && !next.has(nextKey)) {
@@ -231,6 +261,7 @@
                                         }
                                     }
 
+                                    // Move down
                                     if (lineIndex + 1 < topPoem.length) {
                                         const downKey = getCellKey(lineIndex + 1, charIndex);
                                         if (!currentBurnt.has(downKey) && !next.has(downKey)) {
@@ -342,7 +373,6 @@
                 );
             };
 
-            // Make sure the target element exists before creating root
             const burningPoemElement = document.getElementById('burning-poem');
             if (burningPoemElement) {
                 const root = ReactDOM.createRoot(burningPoemElement);
@@ -469,15 +499,6 @@
                 moveLine(1);
                 event.preventDefault();
             }
-        });
-
-        // Initialize both poems when the document is ready
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize the tense poem
-            updateDisplay();
-            
-            // Initialize the burning poem with dependency checking
-            initializeBurningPoem();
         });
     </script>
 </body>
