@@ -3,16 +3,17 @@
 <head>
     <title>Interactive Poetry Chapbook</title>
     <meta charset="UTF-8">
+    <link rel="icon" href="data:,">
 
-    <!-- Load React and ReactDOM from jsDelivr with SRI hashes, with defer -->
+    <!-- Load React and ReactDOM from jsDelivr with SRI hashes -->
     <script defer src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js" integrity="sha256-S0lp+k7zWUMk2ixteM6HZvu8L9Eh//OVrt+ZfbCpmgY=" crossorigin="anonymous"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js" integrity="sha256-IXWO0ITNDjfnNXIu5POVfqlgYoop36bDzhodR6LW5Pc=" crossorigin="anonymous"></script>
 
-    <!-- Load Lucide from jsDelivr with defer -->
-    <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.263.1/dist/umd/lucide.min.js" integrity="sha256-6yNlEGalYS+G8oE/poKdJwf/oWByqBOc2t+5VNe7OvM=" crossorigin="anonymous"></script>
+    <!-- Updated Lucide version from unpkg -->
+    <script defer src="https://unpkg.com/lucide@0.453.0" crossorigin="anonymous"></script>
 
-    <!-- Initialization moved to window.load event -->
-    <script defer>
+    <!-- Debug script -->
+    <script>
         console.log('Starting script load...');
         window.addEventListener('load', () => {
             console.log('Window loaded');
@@ -21,7 +22,6 @@
                 reactDOM: typeof ReactDOM,
                 lucide: typeof lucide
             });
-
             // Initialize both poems after window load
             updateDisplay();
             initializeBurningPoem();
