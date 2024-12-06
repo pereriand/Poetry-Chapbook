@@ -9,8 +9,8 @@
     <script defer src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js" integrity="sha256-S0lp+k7zWUMk2ixteM6HZvu8L9Eh//OVrt+ZfbCpmgY=" crossorigin="anonymous"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js" integrity="sha256-IXWO0ITNDjfnNXIu5POVfqlgYoop36bDzhodR6LW5Pc=" crossorigin="anonymous"></script>
 
-    <!-- Updated Lucide version from unpkg -->
-    <script defer src="https://unpkg.com/lucide@0.453.0" crossorigin="anonymous"></script>
+    <!-- Updated Lucide to IIFE build -->
+    <script defer src="https://unpkg.com/lucide@0.453.0/dist/iife/lucide.min.js" crossorigin="anonymous"></script>
 
     <!-- Debug script -->
     <script>
@@ -22,6 +22,9 @@
                 reactDOM: typeof ReactDOM,
                 lucide: typeof lucide
             });
+            // Additional debug line to inspect lucide contents
+            console.log('Lucide contents:', lucide);
+
             // Initialize both poems after window load
             updateDisplay();
             initializeBurningPoem();
@@ -353,12 +356,12 @@
                             }
                         },
                             React.createElement("div", { className: "w-8 h-3 bg-zinc-600 rounded-sm" }),
-                            // Updated Flame icon usage:
-                            React.createElement(lucide.icons.Flame, { 
+                            // Keeping the existing Flame usage; we will see lucide contents and decide next steps:
+                            // If needed, we will adjust how to access the icon based on lucide's structure.
+                            React.createElement("div", {
                                 className: `w-6 h-6 text-orange-500 ${isLit ? 'animate-pulse' : ''}`,
-                                color: "#f97316",
-                                size: 24
-                            }),
+                                style: { color: "#f97316", fontSize: '24px' }
+                            }, "🔥"),
                             React.createElement("div", {
                                 className: "w-10 h-12 bg-zinc-300 rounded-sm",
                                 style: {
